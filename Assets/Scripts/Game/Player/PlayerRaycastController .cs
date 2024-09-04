@@ -10,6 +10,7 @@ public class PlayerRaycastController : SubjectMonoBehaviour
     [SerializeField] private float raycastDistance = 6;
 
     [SerializeField] private LayerMask interactableLayer;
+    [SerializeField] private LayerMask buildingRelatedLayer;
 
     [Header("Other")]
     [SerializeField] private Camera raycastCamera;
@@ -47,8 +48,6 @@ public class PlayerRaycastController : SubjectMonoBehaviour
     private void Update()
     {
         _raycastAction?.Invoke();
-
-        if (_curHit.collider != null) Debug.Log(_curHit.collider.gameObject.name); 
     }
 
     private void RaycastForInteraction()
@@ -58,7 +57,6 @@ public class PlayerRaycastController : SubjectMonoBehaviour
             if (!_curOnInteractable)
             {
                 _curOnInteractable = true;
-
 
             }
         }
@@ -71,11 +69,10 @@ public class PlayerRaycastController : SubjectMonoBehaviour
 
     private void RaycastForBuilding()
     {
-        if (Physics.Raycast(raycastCamera.transform.position, raycastCamera.transform.forward, out _curHit, raycastDistance))
+        if (Physics.Raycast(raycastCamera.transform.position, raycastCamera.transform.forward, out _curHit, raycastDistance, buildingRelatedLayer))
         {
             _curPickableTargetPosition = _curHit.point + _curHit.normal;
-
-            _buildingManager.SetOnPlacingLayer(_curHit.collider.gameObject.layer == _curPickableLayerMask);
+            _buildingManager.SetOnPlacingLayer((_curPickableLayerMask & (1 << _curHit.collider.gameObject.layer)) != 0);
         }
         else
         {

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -31,8 +33,18 @@ public class BuildingManager : SubjectMonoBehaviour
     private bool _curPickableOnLayerForPlacing;
     private bool _curPickableCanBePlaced;
 
+    private void Awake()
+    {
+
+        Init(new Dictionary<EventEnum, Action>
+        {
+            { EventEnum.InGameStartBuilding, OnStartBuilding },
+        });
+    }
+
     public void PickUpPickableStartBuilding(IPickable pickable, out LayerMask pickablePlaceableLayerMask)
     {
+
         _curPickable = pickable;
 
         _curPickableObjectInfo = pickableObjectsInfos.First(x => x.PickableName == _curPickable.PickableNameEnum);
@@ -42,6 +54,7 @@ public class BuildingManager : SubjectMonoBehaviour
         _curPickable.OnTrigger += OnPickableTriggered;
 
         Observer.OnHandleEvent(EventEnum.InGameStartBuilding);
+
     }
     public void PutDownPickableStopBuilding()
     {
@@ -94,5 +107,13 @@ public class BuildingManager : SubjectMonoBehaviour
 
         if (_curPickableTriggeredAmount == 0 || _curPickableTriggeredAmount == 1) CheckSignalPlayerAbleToPlace();
     }
+
+    private void ResetPickable()
+    {
+        _curPickableCanBePlaced = true;
+        _curPickable.ApplyMaterial(canBePlacedMaterial);
+    }
+
+    private void OnStartBuilding() => ResetPickable();
 }
 

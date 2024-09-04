@@ -13,6 +13,8 @@ public class PickableObject : MonoBehaviour, IPickable
     [SerializeField] private MeshRenderer meshRenderer;
 
 
+    private Material _defaultMaterial;
+    
     private int _curTriggeredAmount;
     private int _triggeredAmount
     {
@@ -28,6 +30,11 @@ public class PickableObject : MonoBehaviour, IPickable
     public PickableNameEnum PickableNameEnum => pickableName;
     public event Action<int> OnTrigger;
 
+    private void Start()
+    {
+        _defaultMaterial = meshRenderer.material;
+    }
+
     public void PickedUp()
     {
         _curTriggeredAmount = 0;
@@ -37,7 +44,8 @@ public class PickableObject : MonoBehaviour, IPickable
 
     public void PlacedDown()
     {
-        
+        meshRenderer.material = _defaultMaterial;
+
         objectCollider.isTrigger = false;
     }
 
