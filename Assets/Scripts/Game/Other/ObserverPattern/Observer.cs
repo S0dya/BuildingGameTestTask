@@ -1,7 +1,8 @@
 
 public enum EventEnum
 {
-
+    InGameStartBuilding,
+    InGameStopBuilding,
 }
 
 public static class Observer

@@ -20,7 +20,7 @@ public class InputManager : SubjectMonoBehaviour
         _player = player;
     }
 
-    private void Awake()
+    public void Init()
     {
 
         Init(new Dictionary<EventEnum, Action>
@@ -49,6 +49,8 @@ public class InputManager : SubjectMonoBehaviour
 
         _input.InGameInput.Look.performed += ctx => _player.InputLook(ctx.ReadValue<Vector2>());
 
+        _input.InGameInput.Interact.performed += ctx => _player.InputInteract();
+
         _input.Enable();
     }
 
@@ -61,6 +63,8 @@ public class InputManager : SubjectMonoBehaviour
         _input.InGameInput.Move.canceled -= ctx => _player.InputMoveStopped();
 
         _input.InGameInput.Look.performed -= ctx => _player.InputLook(ctx.ReadValue<Vector2>());
+
+        _input.InGameInput.Interact.performed -= ctx => _player.InputInteract();
 
         _input.Disable();
     }

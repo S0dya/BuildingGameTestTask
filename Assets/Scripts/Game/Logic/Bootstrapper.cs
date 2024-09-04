@@ -14,5 +14,6 @@ public class Bootstrapper : MonoBehaviour
     private void Awake()
     {
 
+        _container.Resolve<InputManager>().Init();
     }
 }
