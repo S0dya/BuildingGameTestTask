@@ -11,7 +11,8 @@ public interface IPickable
     public void PickedUp();
     public void PlacedDown();
 
-    public void MoveToPosition(Vector3 position);
+    public void MoveRotateToPosition(Vector3 position, Vector3 surfaceNormal);
+    public void Rotate(float rotationY);
 
     public void ApplyMaterial(Material material);
 }

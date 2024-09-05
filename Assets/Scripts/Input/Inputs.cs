@@ -53,6 +53,15 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""WheelRotate"",
+                    ""type"": ""Value"",
+                    ""id"": ""be97b8a3-621d-4699-a97b-90336ce70f10"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -132,6 +141,17 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
                     ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5c075396-88b8-4142-a59b-46995c3a6aa9"",
+                    ""path"": ""<Mouse>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": ""ScaleVector2(x=0.05,y=0.05)"",
+                    ""groups"": """",
+                    ""action"": ""WheelRotate"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -143,6 +163,7 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
         m_InGameInput_Move = m_InGameInput.FindAction("Move", throwIfNotFound: true);
         m_InGameInput_Look = m_InGameInput.FindAction("Look", throwIfNotFound: true);
         m_InGameInput_Interact = m_InGameInput.FindAction("Interact", throwIfNotFound: true);
+        m_InGameInput_WheelRotate = m_InGameInput.FindAction("WheelRotate", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -207,6 +228,7 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
     private readonly InputAction m_InGameInput_Move;
     private readonly InputAction m_InGameInput_Look;
     private readonly InputAction m_InGameInput_Interact;
+    private readonly InputAction m_InGameInput_WheelRotate;
     public struct InGameInputActions
     {
         private @Inputs m_Wrapper;
@@ -214,6 +236,7 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_InGameInput_Move;
         public InputAction @Look => m_Wrapper.m_InGameInput_Look;
         public InputAction @Interact => m_Wrapper.m_InGameInput_Interact;
+        public InputAction @WheelRotate => m_Wrapper.m_InGameInput_WheelRotate;
         public InputActionMap Get() { return m_Wrapper.m_InGameInput; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -232,6 +255,9 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
             @Interact.started += instance.OnInteract;
             @Interact.performed += instance.OnInteract;
             @Interact.canceled += instance.OnInteract;
+            @WheelRotate.started += instance.OnWheelRotate;
+            @WheelRotate.performed += instance.OnWheelRotate;
+            @WheelRotate.canceled += instance.OnWheelRotate;
         }
 
         private void UnregisterCallbacks(IInGameInputActions instance)
@@ -245,6 +271,9 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
             @Interact.started -= instance.OnInteract;
             @Interact.performed -= instance.OnInteract;
             @Interact.canceled -= instance.OnInteract;
+            @WheelRotate.started -= instance.OnWheelRotate;
+            @WheelRotate.performed -= instance.OnWheelRotate;
+            @WheelRotate.canceled -= instance.OnWheelRotate;
         }
 
         public void RemoveCallbacks(IInGameInputActions instance)
@@ -267,5 +296,6 @@ public partial class @Inputs: IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnLook(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
+        void OnWheelRotate(InputAction.CallbackContext context);
     }
 }

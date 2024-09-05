@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -73,22 +72,21 @@ public class PlayerRaycastController : SubjectMonoBehaviour
         {
             _curPickableTargetPosition = _curHit.point + _curHit.normal;
             _buildingManager.SetOnPlacingLayer((_curPickableLayerMask & (1 << _curHit.collider.gameObject.layer)) != 0);
+            _buildingManager.MovePickableToPosition(_curPickableTargetPosition, _curHit.normal);
         }
         else
         {
             _curPickableTargetPosition = raycastCamera.transform.position + raycastCamera.transform.forward * raycastDistance;
 
             _buildingManager.SetOnPlacingLayer(false);
+            _buildingManager.MovePickableToPosition(_curPickableTargetPosition, Vector3.up);
         }
-
-        _buildingManager.MovePickableToPosition(_curPickableTargetPosition);
     }
 
     public void InputInteract()
     {
         _interactionAction.Invoke();
     }
-
     private void OnInteractWithInteractable()
     {
         if (_curOnInteractable)
@@ -99,6 +97,8 @@ public class PlayerRaycastController : SubjectMonoBehaviour
             {
                 case IPickable pickable:
                     _buildingManager.PickUpPickableStartBuilding(pickable, out _curPickableLayerMask);
+
+                    RaycastForBuilding();
                     break;
             }
 

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine;
+using System.Collections;
 
 public enum PickableNameEnum
 {
@@ -44,7 +45,6 @@ public class BuildingManager : SubjectMonoBehaviour
 
     public void PickUpPickableStartBuilding(IPickable pickable, out LayerMask pickablePlaceableLayerMask)
     {
-
         _curPickable = pickable;
 
         _curPickableObjectInfo = pickableObjectsInfos.First(x => x.PickableName == _curPickable.PickableNameEnum);
@@ -56,6 +56,7 @@ public class BuildingManager : SubjectMonoBehaviour
         Observer.OnHandleEvent(EventEnum.InGameStartBuilding);
 
     }
+
     public void PutDownPickableStopBuilding()
     {
 
@@ -66,9 +67,13 @@ public class BuildingManager : SubjectMonoBehaviour
         Observer.OnHandleEvent(EventEnum.InGameStopBuilding);
     }
 
-    public void MovePickableToPosition(Vector3 position)
+    public void MovePickableToPosition(Vector3 position, Vector3 surfaceNormal)
     {
-        _curPickable.MoveToPosition(position + _curPickableObjectInfo.PickableHeightOffset);
+        _curPickable.MoveRotateToPosition(position + surfaceNormal * _curPickableObjectInfo.PickableHeightOffset.y, surfaceNormal);
+    }
+    public void RotatePickable(float rotationY)
+    {
+        _curPickable.Rotate(rotationY);
     }
 
     public void SetOnPlacingLayer(bool val)
@@ -80,23 +85,17 @@ public class BuildingManager : SubjectMonoBehaviour
 
     private void CheckSignalPlayerAbleToPlace()
     {
-        if (_curPickableCanBePlaced)
+        if (_curPickableTriggeredAmount > 0 || !_curPickableOnLayerForPlacing)
         {
-            if (_curPickableTriggeredAmount > 0 || !_curPickableOnLayerForPlacing)
-            {
-                _curPickable.ApplyMaterial(cantBePlacedMaterial);
+            _curPickable.ApplyMaterial(cantBePlacedMaterial);
 
-                _curPickableCanBePlaced = false;
-            }
+            _curPickableCanBePlaced = false;
         }
-        else
+        else if (_curPickableTriggeredAmount == 0 && _curPickableOnLayerForPlacing)
         {
-            if (_curPickableTriggeredAmount == 0 && _curPickableOnLayerForPlacing)
-            {
-                _curPickable.ApplyMaterial(canBePlacedMaterial);
+            _curPickable.ApplyMaterial(canBePlacedMaterial);
 
-                _curPickableCanBePlaced = true;
-            }
+            _curPickableCanBePlaced = true;
         }
     }
     public bool CanPlacePickable() => _curPickableCanBePlaced;
@@ -108,12 +107,13 @@ public class BuildingManager : SubjectMonoBehaviour
         if (_curPickableTriggeredAmount == 0 || _curPickableTriggeredAmount == 1) CheckSignalPlayerAbleToPlace();
     }
 
-    private void ResetPickable()
+    private IEnumerator ResetPickable()
     {
-        _curPickableCanBePlaced = true;
-        _curPickable.ApplyMaterial(canBePlacedMaterial);
+        yield return null;
+
+        CheckSignalPlayerAbleToPlace();
     }
 
-    private void OnStartBuilding() => ResetPickable();
+    private void OnStartBuilding() => StartCoroutine(ResetPickable());
 }
 

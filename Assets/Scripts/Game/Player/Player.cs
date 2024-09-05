@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class Player : SubjectMonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] private float movementSpeed = 4;
+
+    [SerializeField] private float mouseWheelRotateSpeed = 4;
 
     [Header("Components")]
     [SerializeField] private PlayerRaycastController raycastController;
@@ -15,10 +18,19 @@ public class Player : SubjectMonoBehaviour
     [Header("Other")]
     [SerializeField] private Transform cameraTransform;
 
+    private BuildingManager _buildingManager;
+
     private Action _interactAction;
+    private Action<float> _rotatePickableAction;
 
     private Vector2 _curMovementDirection;
     private Vector2 _curLookDirection;
+
+    [Inject]
+    public void Construct(BuildingManager buildingManager)
+    {
+        _buildingManager = buildingManager;
+    }
 
     private void Awake()
     {
@@ -59,6 +71,11 @@ public class Player : SubjectMonoBehaviour
         _interactAction.Invoke();
     }
 
+    public void InputRotate(float rotationDirection)
+    {
+        _rotatePickableAction?.Invoke(rotationDirection);
+    }
+
     private void InteractForInteraction()
     {
         raycastController.InputInteract();
@@ -68,12 +85,20 @@ public class Player : SubjectMonoBehaviour
         raycastController.InputInteract();
     }
 
+    public void RotatePickableForBuilding(float rotationDirection)
+    {
+
+        _buildingManager.RotatePickable(rotationDirection * mouseWheelRotateSpeed);
+    }
+
     private void OnStartBuilding()
     {
         _interactAction = InteractForBuilding;
+        _rotatePickableAction = RotatePickableForBuilding;
     }
     private void OnStopBuilding()
     {
         _interactAction = InteractForInteraction;
+        _rotatePickableAction = null;
     }
 }

@@ -51,6 +51,8 @@ public class InputManager : SubjectMonoBehaviour
 
         _input.InGameInput.Interact.performed += ctx => _player.InputInteract();
 
+        _input.InGameInput.WheelRotate.performed += ctx => _player.InputRotate(ctx.ReadValue<Vector2>().y);
+
         _input.Enable();
     }
 
@@ -65,6 +67,8 @@ public class InputManager : SubjectMonoBehaviour
         _input.InGameInput.Look.performed -= ctx => _player.InputLook(ctx.ReadValue<Vector2>());
 
         _input.InGameInput.Interact.performed -= ctx => _player.InputInteract();
+
+        _input.InGameInput.WheelRotate.performed -= ctx => _player.InputRotate(ctx.ReadValue<Vector2>().y);
 
         _input.Disable();
     }
