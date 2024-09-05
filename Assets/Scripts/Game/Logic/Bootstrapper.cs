@@ -15,5 +15,7 @@ public class Bootstrapper : MonoBehaviour
     {
 
         _container.Resolve<InputManager>().Init();
+
+        Cursor.visible = false; //remove later
     }
 }
