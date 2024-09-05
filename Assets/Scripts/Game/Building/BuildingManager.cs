@@ -59,8 +59,6 @@ public class BuildingManager : SubjectMonoBehaviour
 
     public void PutDownPickableStopBuilding()
     {
-
-
         _curPickable.PlacedDown();
         _curPickable.OnTrigger -= OnPickableTriggered;
 
