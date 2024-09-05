@@ -4,8 +4,8 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - ship
-  - asteroid
+  - PickableCube
+  - PickableSphere
   layers:
   - Default
   - TransparentFX

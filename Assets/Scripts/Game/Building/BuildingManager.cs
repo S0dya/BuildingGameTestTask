@@ -9,13 +9,21 @@ public enum PickableNameEnum
     Cube, 
     Sphere,
 }
+public enum SurfaceTypeEnum
+{
+    none,
+    PickableObjectCube,
+    PickableObjectSphere,
+}
 
 [System.Serializable]
 class PickableObjectInfo
 {
     [SerializeField] public PickableNameEnum PickableName;
     [SerializeField] public LayerMask PlaceableLayerMask;
+    [SerializeField] public SurfaceTypeEnum[] ValidSurfaces;
     [SerializeField] public Vector3 PickableHeightOffset;
+    [SerializeField] public float RotationLimit;
 }
 
 public class BuildingManager : SubjectMonoBehaviour
@@ -31,6 +39,7 @@ public class BuildingManager : SubjectMonoBehaviour
     private PickableObjectInfo _curPickableObjectInfo;
 
     private int _curPickableTriggeredAmount;
+    private bool _curPickableHasValidRotation;
     private bool _curPickableOnLayerForPlacing;
     private bool _curPickableCanBePlaced;
 
@@ -43,18 +52,26 @@ public class BuildingManager : SubjectMonoBehaviour
         });
     }
 
-    public void PickUpPickableStartBuilding(IPickable pickable, out LayerMask pickablePlaceableLayerMask)
+    public void PickUpPickableStartBuilding(IPickable pickable, 
+        out LayerMask pickablePlaceableLayerMask, out SurfaceTypeEnum[] validSurfaces)
     {
         _curPickable = pickable;
 
         _curPickableObjectInfo = pickableObjectsInfos.First(x => x.PickableName == _curPickable.PickableNameEnum);
         pickablePlaceableLayerMask = _curPickableObjectInfo.PlaceableLayerMask;
+        validSurfaces = _curPickableObjectInfo.ValidSurfaces;
+
+
+
+
+
+
 
         _curPickable.PickedUp();
         _curPickable.OnTrigger += OnPickableTriggered;
+        _curPickable.OnRotated += OnPickableRotated;
 
         Observer.OnHandleEvent(EventEnum.InGameStartBuilding);
-
     }
 
     public void PutDownPickableStopBuilding()
@@ -83,13 +100,13 @@ public class BuildingManager : SubjectMonoBehaviour
 
     private void CheckSignalPlayerAbleToPlace()
     {
-        if (_curPickableTriggeredAmount > 0 || !_curPickableOnLayerForPlacing)
+        if (_curPickableTriggeredAmount > 0 || !_curPickableOnLayerForPlacing || !_curPickableHasValidRotation)
         {
             _curPickable.ApplyMaterial(cantBePlacedMaterial);
 
             _curPickableCanBePlaced = false;
         }
-        else if (_curPickableTriggeredAmount == 0 && _curPickableOnLayerForPlacing)
+        else if (_curPickableTriggeredAmount == 0 && _curPickableOnLayerForPlacing && _curPickableHasValidRotation)
         {
             _curPickable.ApplyMaterial(canBePlacedMaterial);
 
@@ -104,6 +121,21 @@ public class BuildingManager : SubjectMonoBehaviour
 
         if (_curPickableTriggeredAmount == 0 || _curPickableTriggeredAmount == 1) CheckSignalPlayerAbleToPlace();
     }
+    private void OnPickableRotated(Vector3 rotationValues)
+    {
+        float normalizedX = NormalizeRotation(rotationValues.x);
+        float normalizedZ = NormalizeRotation(rotationValues.z);
+
+        bool validRotation = _curPickableObjectInfo.RotationLimit > Mathf.Abs(normalizedX) &&
+                             _curPickableObjectInfo.RotationLimit > Mathf.Abs(normalizedZ);
+
+        if (_curPickableHasValidRotation != validRotation)
+        {
+            _curPickableHasValidRotation = validRotation;
+            CheckSignalPlayerAbleToPlace();
+        }
+    }
+    private float NormalizeRotation(float rotation) => Mathf.Repeat(rotation + 180f, 360f) - 180f;
 
     private IEnumerator ResetPickable()
     {

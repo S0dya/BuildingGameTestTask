@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 using Zenject;
 
 public class PlayerRaycastController : SubjectMonoBehaviour
@@ -21,6 +22,7 @@ public class PlayerRaycastController : SubjectMonoBehaviour
 
     private RaycastHit _curHit;
     private LayerMask _curPickableLayerMask;
+    private SurfaceTypeEnum[] _curValidSurfaces;
 
     private Vector3 _curPickableTargetPosition;
 
@@ -65,14 +67,19 @@ public class PlayerRaycastController : SubjectMonoBehaviour
 
         }
     }
-
     private void RaycastForBuilding()
     {
         if (Physics.Raycast(raycastCamera.transform.position, raycastCamera.transform.forward, out _curHit, raycastDistance, buildingRelatedLayer))
         {
-            _curPickableTargetPosition = _curHit.point + _curHit.normal;
-            _buildingManager.SetOnPlacingLayer((_curPickableLayerMask & (1 << _curHit.collider.gameObject.layer)) != 0);
-            _buildingManager.MovePickableToPosition(_curPickableTargetPosition, _curHit.normal);
+            var surfaceType = _curHit.collider.gameObject.GetComponent<SurfaceType>();
+            if (surfaceType != null)
+            {
+                _curPickableTargetPosition = _curHit.point + _curHit.normal;
+
+                _buildingManager.SetOnPlacingLayer((_curPickableLayerMask & (1 << _curHit.collider.gameObject.layer)) != 0 
+                    && _curValidSurfaces.Contains(surfaceType.SurfaceTypeEnum));
+                _buildingManager.MovePickableToPosition(_curPickableTargetPosition, _curHit.normal);
+            }
         }
         else
         {
@@ -96,7 +103,7 @@ public class PlayerRaycastController : SubjectMonoBehaviour
             switch (interactableObject)
             {
                 case IPickable pickable:
-                    _buildingManager.PickUpPickableStartBuilding(pickable, out _curPickableLayerMask);
+                    _buildingManager.PickUpPickableStartBuilding(pickable, out _curPickableLayerMask, out _curValidSurfaces);
 
                     RaycastForBuilding();
                     break;

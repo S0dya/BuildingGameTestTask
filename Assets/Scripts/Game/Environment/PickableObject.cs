@@ -1,7 +1,6 @@
 using System;
 using TMPro;
 using UnityEngine;
-using static UnityEngine.GridBrushBase;
 
 public class PickableObject : MonoBehaviour, IPickable
 {
@@ -14,8 +13,10 @@ public class PickableObject : MonoBehaviour, IPickable
 
     public PickableNameEnum PickableNameEnum => pickableName;
     public event Action<int> OnTrigger;
+    public event Action<Vector3> OnRotated;
 
     private Material _defaultMaterial;
+    private LayerMask _defaultLayer;
     
     private int _curTriggeredAmount;
     private int _triggeredAmount
@@ -35,6 +36,7 @@ public class PickableObject : MonoBehaviour, IPickable
     {
         _curRotationY = transform.rotation.eulerAngles.y;
 
+        _defaultLayer = gameObject.layer;
         _defaultMaterial = meshRenderer.material;
     }
 
@@ -42,6 +44,7 @@ public class PickableObject : MonoBehaviour, IPickable
     {
         _curTriggeredAmount = 0;
 
+        gameObject.layer = 2;
         objectCollider.isTrigger = true;
     }
 
@@ -49,6 +52,7 @@ public class PickableObject : MonoBehaviour, IPickable
     {
         meshRenderer.material = _defaultMaterial;
 
+        gameObject.layer = _defaultLayer;
         objectCollider.isTrigger = false;
     }
 
@@ -58,6 +62,8 @@ public class PickableObject : MonoBehaviour, IPickable
         transform.up = surfaceNormal;
 
         SetRotation();
+
+        OnRotated?.Invoke(transform.rotation.eulerAngles);
     }
     public void Rotate(float rotationY)
     {

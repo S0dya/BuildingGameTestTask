@@ -6,7 +6,7 @@ public interface IPickable
     public PickableNameEnum PickableNameEnum { get; }
 
     public event Action<int> OnTrigger;
-
+    public event Action<Vector3> OnRotated;
 
     public void PickedUp();
     public void PlacedDown();
